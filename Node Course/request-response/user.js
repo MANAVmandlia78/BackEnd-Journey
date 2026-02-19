@@ -1,8 +1,7 @@
-const http = require('http');
 const fs = require('fs');
 
-const server = http.createServer((req,res) => {
-    console.log(req.url,req.method,req.headers);
+const userRequestHandler = ((req,res) => {
+    console.log(req.url,req.method);
 
     if(req.url === '/'){
 res.setHeader('Content-Type','text/html');
@@ -28,7 +27,22 @@ res.setHeader('Content-Type','text/html');
     return res.end();
     }
     else if(req.url.toLocaleLowerCase() === '/submit-details' && req.method == "POST"){
-fs.writeFileSync('user.txt','Manav Mandalia');
+        const body = [];
+        req.on('data',chunk => {
+            console.log(chunk);
+            body.push(chunk);
+        });
+        req.on('end',()=>{
+           const fullbody = Buffer.concat(body).toString();
+           const params = new URLSearchParams(fullbody);
+        //    const bodyObject = {};
+        //    for(const [key,val] of params.entries()){
+        //     bodyObject[key] = val;
+        //    }
+        const bodyObject = Object.fromEntries(params);
+           console.log(bodyObject)
+           fs.writeFileSync('user.txt',JSON.stringify(bodyObject));
+        })
 res.statusCode = 302;
 res.setHeader('Location','/')
 return res.end(); 
@@ -43,8 +57,4 @@ res.setHeader('Content-Type','text/html');
     }
 });
 
-const PORT = 3000;
-
-server.listen(PORT, () => {
-    console.log(`Server running on address http://localhost:${PORT}`);
-});
+module.exports = userRequestHandler;
