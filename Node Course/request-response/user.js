@@ -1,60 +1,64 @@
-const fs = require('fs');
+const { error } = require("console");
+const fs = require("fs");
 
-const userRequestHandler = ((req,res) => {
-    console.log(req.url,req.method);
+const userRequestHandler = (req, res) => {
+  console.log(req.url, req.method);
 
-    if(req.url === '/'){
-res.setHeader('Content-Type','text/html');
-    res.write('<html>');
-    res.write('<head><title>Complete coding</title></head>');
-    res.write('<body><h1>Enter you Details:</h1>');
+  if (req.url === "/") {
+    res.setHeader("Content-Type", "text/html");
+    res.write("<html>");
+    res.write("<head><title>Complete coding</title></head>");
+    res.write("<body><h1>Enter you Details:</h1>");
     res.write('<form action="/submit-details" method="POST">');
-    res.write('<input type="text" name="username" placeholder="Enter Your Name"><br>');
-    res.write('<label for="male">Male</label>')
-    res.write('<input type="radio" id="male" name="gender" value="male" />')
-    res.write('<label for="female">Female</label>')
-    res.write('<input type="radio" id="female" name="gender" value="female" />')
-    res.write('<input type="submit" name="Submit" />')
-    res.write('</form>');
-    res.write('</html>');
+    res.write(
+      '<input type="text" name="username" placeholder="Enter Your Name"><br>',
+    );
+    res.write('<label for="male">Male</label>');
+    res.write('<input type="radio" id="male" name="gender" value="male" />');
+    res.write('<label for="female">Female</label>');
+    res.write(
+      '<input type="radio" id="female" name="gender" value="female" />',
+    );
+    res.write('<input type="submit" name="Submit" />');
+    res.write("</form>");
+    res.write("</html>");
     return res.end();
-    }else if(req.url === '/products'){
-res.setHeader('Content-Type','text/html');
-    res.write('<html>');
-    res.write('<head><title>Manav Mandalia</title></head>');
-    res.write('<body><h1>Check Out our products</h1></body>');
-    res.write('</html>');
+  } else if (req.url === "/products") {
+    res.setHeader("Content-Type", "text/html");
+    res.write("<html>");
+    res.write("<head><title>Manav Mandalia</title></head>");
+    res.write("<body><h1>Check Out our products</h1></body>");
+    res.write("</html>");
     return res.end();
-    }
-    else if(req.url.toLocaleLowerCase() === '/submit-details' && req.method == "POST"){
-        const body = [];
-        req.on('data',chunk => {
-            console.log(chunk);
-            body.push(chunk);
-        });
-        req.on('end',()=>{
-           const fullbody = Buffer.concat(body).toString();
-           const params = new URLSearchParams(fullbody);
-        //    const bodyObject = {};
-        //    for(const [key,val] of params.entries()){
-        //     bodyObject[key] = val;
-        //    }
-        const bodyObject = Object.fromEntries(params);
-           console.log(bodyObject)
-           fs.writeFileSync('user.txt',JSON.stringify(bodyObject));
-        })
-res.statusCode = 302;
-res.setHeader('Location','/')
-return res.end(); 
-    }
-    else{
-res.setHeader('Content-Type','text/html');
-    res.write('<html>');
-    res.write('<head><title>Manav Mandalia</title></head>');
-    res.write('<body><h1>Manav Mandalia</h1></body>');
-    res.write('</html>');
+  } else if (
+    req.url.toLocaleLowerCase() === "/submit-details" &&
+    req.method == "POST"
+  ) {
+    const body = [];
+    req.on("data", (chunk) => {
+      console.log(chunk);
+      body.push(chunk);
+    });
+    req.on("end", () => {
+      const fullbody = Buffer.concat(body).toString();
+      const params = new URLSearchParams(fullbody);
+      const bodyObject = Object.fromEntries(params);
+      console.log(bodyObject);
+      fs.writeFile("user.txt", JSON.stringify(bodyObject), (error) => {
+        console.log("Data written successfully");
+        res.statusCode = 302;
+        res.setHeader("Location", "/");
+        return res.end();
+      });
+    });
+  } else {
+    res.setHeader("Content-Type", "text/html");
+    res.write("<html>");
+    res.write("<head><title>Manav Mandalia</title></head>");
+    res.write("<body><h1>Manav Mandalia</h1></body>");
+    res.write("</html>");
     return res.end();
-    }
-});
+  }
+};
 
 module.exports = userRequestHandler;
